@@ -368,11 +368,51 @@ module parc_CoreCtrl
       `PARC_INST_MSG_XORI     :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_zi,   n, alu_xor, md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rt, n   };
       //Check These
       `PARC_INST_MSG_SLTI     :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,   n, alu_lt , md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rt, n   };
-      `PARC_INST_MSG_SLTIU    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,   n, alu_lt , md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rt, n   };
+      `PARC_INST_MSG_SLTIU    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,   n, alu_ltu , md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rt, n   };
       
-      `PARC_INST_MSG_SLL     :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_zi,   n, alu_sll, md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rt, n   };
-      `PARC_INST_MSG_SRL     :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_zi,   n, alu_srl, md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rt, n   };
-      `PARC_INST_MSG_SRA     :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_zi,   n, alu_sra, md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rt, n   };
+      `PARC_INST_MSG_SLL     :cs={ y,  n,    br_none, pm_p,   am_sh, n, bm_rdat,   y, alu_sll, md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_SRL     :cs={ y,  n,    br_none, pm_p,   am_sh, n, bm_rdat,   y, alu_srl, md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_SRA     :cs={ y,  n,    br_none, pm_p,   am_sh, n, bm_rdat,   y, alu_sra, md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+
+      `PARC_INST_MSG_SUBU    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat, y, alu_sub,  md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_AND    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat, y, alu_and,  md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_OR    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat, y, alu_or,  md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_XOR    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat, y, alu_xor,  md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_NOR    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat, y, alu_nor,  md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_SLT    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat, y, alu_lt,  md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_SLTU    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat, y, alu_ltu,  md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+
+
+      `PARC_INST_MSG_SLLV     :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat,   y, alu_sll, md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_SRLV     :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat,   y, alu_srl, md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_SRAV     :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat,   y, alu_sra, md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      //Memory Instructions
+      `PARC_INST_MSG_LH       :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,     n, alu_add, md_x,    n, mdm_x, em_x,   ld,  ml_h, dmm_h,  wm_mem, y,  rt, n   };
+      `PARC_INST_MSG_LHU       :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,     n, alu_add, md_x,    n, mdm_x, em_x,   ld,  ml_h, dmm_hu,  wm_mem, y,  rt, n   };
+      `PARC_INST_MSG_LB       :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,     n, alu_add, md_x,    n, mdm_x, em_x,   ld,  ml_b, dmm_b,  wm_mem, y,  rt, n   };
+      `PARC_INST_MSG_LBU       :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,     n, alu_add, md_x,    n, mdm_x, em_x,   ld,  ml_b, dmm_bu,  wm_mem, y,  rt, n   };
+      
+      `PARC_INST_MSG_SH      :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,   y, alu_add,  md_x,    n, mdm_x, em_x,   st,  ml_h, dmm_h,  wm_mem, n,  rx, n   };
+      `PARC_INST_MSG_SB      :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,   y, alu_add,  md_x,    n, mdm_x, em_x,   st,  ml_b, dmm_b,  wm_mem, n,  rx, n   };
+
+
+      //JUMP Instructions
+      `PARC_INST_MSG_JALR      :cs={ y,  y,    br_none, pm_r,   am_0,    y, bm_pc,    n, alu_add,    md_x,    n, mdm_x, em_alu,   nr,  ml_x, dmm_x,  wm_alu,   y,  rd, n   };
+      `PARC_INST_MSG_J         :cs={ y,  y,    br_none, pm_j,   am_x,    n, bm_x,   n, alu_x,  md_x,    n, mdm_x, em_x, nr,  ml_x, dmm_x,  wm_x, n,  rx, n   };
+
+      //Branch 
+      `PARC_INST_MSG_BEQ     :cs={ y,  n,     br_beq,  pm_b,    am_rdat, y, bm_rdat, y, alu_xor,  md_x,    n, mdm_x, em_x,   nr,  ml_x, dmm_x,  wm_x,   n,  rx, n   };
+      `PARC_INST_MSG_BLEZ    :cs={ y,  n,     br_blez,  pm_b,   am_rdat, y, bm_x,    n, alu_x,  md_x,    n, mdm_x, em_x,   nr,  ml_x, dmm_x,  wm_x,   n,  rx, n   };
+      `PARC_INST_MSG_BGTZ    :cs={ y,  n,     br_bgtz,  pm_b,   am_rdat, y, bm_x,    n, alu_x,  md_x,    n, mdm_x, em_x,   nr,  ml_x, dmm_x,  wm_x,   n,  rx, n   };
+      `PARC_INST_MSG_BLTZ    :cs={ y,  n,     br_bltz,  pm_b,   am_rdat, y, bm_x,    n, alu_x,  md_x,    n, mdm_x, em_x,   nr,  ml_x, dmm_x,  wm_x,   n,  rx, n   };
+      `PARC_INST_MSG_BGEZ    :cs={ y,  n,     br_bgez,  pm_b,   am_rdat, y, bm_x,    n, alu_x,  md_x,    n, mdm_x, em_x,   nr,  ml_x, dmm_x,  wm_x,   n,  rx, n   };
+
+      //Mul Div Instructions
+      `PARC_INST_MSG_MUL    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat, y, alu_and,  md_mul,    y, mdm_l, em_md, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_DIV    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat, y, alu_and,  md_div,    y, mdm_l, em_md, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_DIVU    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat, y, alu_and, md_divu,    y, mdm_l, em_md, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_REM    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat, y, alu_and,  md_rem,    y, mdm_u, em_md, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
+      `PARC_INST_MSG_REMU    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat, y, alu_and,  md_remu,    y, mdm_u, em_md, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
 
     endcase
 
@@ -572,7 +612,12 @@ module parc_CoreCtrl
 
   // Resolve Branch
 
-  wire bne_taken_Xhl  = ( ( br_sel_Xhl == br_bne ) && bne_resolve_Xhl );
+  wire bne_taken_Xhl  = ( ( br_sel_Xhl == br_bne ) && bne_resolve_Xhl ) || ( ( br_sel_Xhl == br_beq ) && ~bne_resolve_Xhl ) 
+                        || ( ( br_sel_Xhl == br_blez ) && (branch_cond_zero_Xhl || branch_cond_neg_Xhl))
+                        || ( ( br_sel_Xhl == br_bgtz ) && ~(branch_cond_zero_Xhl || branch_cond_neg_Xhl))
+                        || ( ( br_sel_Xhl == br_bltz ) && branch_cond_neg_Xhl)
+                        || ( ( br_sel_Xhl == br_bgez ) && ~branch_cond_neg_Xhl);
+
 
   wire any_br_taken_Xhl
     = ( bne_taken_Xhl
