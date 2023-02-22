@@ -30,6 +30,11 @@ module parc_CoreDpath
   input   [1:0] pc_mux_sel_Phl,
   input   [1:0] op0_mux_sel_Dhl,
   input   [2:0] op1_mux_sel_Dhl,
+  //Added Code
+  input  [2:0] rs_op0_byp_mux_sel_Dhl,
+  input  [2:0] rt_op1_byp_mux_sel_Dhl,
+  
+  // End of Added Code
   input  [31:0] inst_Dhl,
   input   [3:0] alu_fn_Xhl,
   input   [2:0] muldivreq_msg_fn_Xhl,
@@ -49,6 +54,8 @@ module parc_CoreDpath
   input         stall_Dhl,
   input         stall_Xhl,
   input         stall_Mhl,
+  input         stall_X2hl,
+  input         stall_X3hl,
   input         stall_Whl,
 
   // Control Signals (dpath->ctrl)
@@ -165,7 +172,7 @@ module parc_CoreDpath
 
   wire [31:0] jumpreg_targ_Dhl;
 
-  assign jumpreg_targ_Dhl  = rf_rdata0_Dhl;
+  assign jumpreg_targ_Dhl  = rs_op0_byp_mux_out_Dhl;
 
   // Zero and sign extension immediate
 
@@ -181,10 +188,32 @@ module parc_CoreDpath
   wire [31:0] const0    = 32'd0;
   wire [31:0] const16   = 32'd16;
 
+
+  //Register Bypassing Mux Selectors
+  wire [31:0] rs_op0_byp_mux_out_Dhl
+    = ( rs_op0_byp_mux_sel_Dhl == 3'd0 ) ? rf_rdata0_Dhl
+    : ( rs_op0_byp_mux_sel_Dhl == 3'd1 ) ? execute_mux_out_Xhl
+    : ( rs_op0_byp_mux_sel_Dhl == 3'd2 ) ? wb_mux_out_Mhl
+    : ( rs_op0_byp_mux_sel_Dhl == 3'd3 ) ? wb_mux_out_X2hl
+    : ( rs_op0_byp_mux_sel_Dhl == 3'd4 ) ? wb_mux_out_X3hl //TODO: REDO CONNECTION ONCE WE ADD MULDIV MUX
+    : ( rs_op0_byp_mux_sel_Dhl == 3'd5 ) ? wb_mux_out_Whl
+    :                               32'bx;
+
+  wire [31:0] rt_op1_byp_mux_out_Dhl
+    = ( rt_op1_byp_mux_sel_Dhl == 3'd0 ) ? rf_rdata1_Dhl
+    : ( rt_op1_byp_mux_sel_Dhl == 3'd1 ) ? execute_mux_out_Xhl
+    : ( rt_op1_byp_mux_sel_Dhl == 3'd2 ) ? wb_mux_out_Mhl
+    : ( rt_op1_byp_mux_sel_Dhl == 3'd3 ) ? wb_mux_out_X2hl
+    : ( rt_op1_byp_mux_sel_Dhl == 3'd4 ) ? wb_mux_out_X3hl  //TODO: REDO CONNECTION ONCE WE ADD MULDIV MUX
+    : ( rt_op1_byp_mux_sel_Dhl == 3'd5 ) ? wb_mux_out_Whl
+    :                               32'bx;
+
+
+
   // Operand 0 mux
 
   wire [31:0] op0_mux_out_Dhl
-    = ( op0_mux_sel_Dhl == 2'd0 ) ? rf_rdata0_Dhl
+    = ( op0_mux_sel_Dhl == 2'd0 ) ? rs_op0_byp_mux_out_Dhl
     : ( op0_mux_sel_Dhl == 2'd1 ) ? shamt_Dhl
     : ( op0_mux_sel_Dhl == 2'd2 ) ? const16
     : ( op0_mux_sel_Dhl == 2'd3 ) ? const0
@@ -193,7 +222,7 @@ module parc_CoreDpath
   // Operand 1 mux
 
   wire [31:0] op1_mux_out_Dhl
-    = ( op1_mux_sel_Dhl == 3'd0 ) ? rf_rdata1_Dhl
+    = ( op1_mux_sel_Dhl == 3'd0 ) ? rt_op1_byp_mux_out_Dhl
     : ( op1_mux_sel_Dhl == 3'd1 ) ? imm_zext_Dhl
     : ( op1_mux_sel_Dhl == 3'd2 ) ? imm_sext_Dhl
     : ( op1_mux_sel_Dhl == 3'd3 ) ? pc_plus4_Dhl
@@ -202,7 +231,7 @@ module parc_CoreDpath
 
   // wdata with bypassing
 
-  wire [31:0] wdata_Dhl = rf_rdata1_Dhl;
+  wire [31:0] wdata_Dhl = rt_op1_byp_mux_out_Dhl;
 
   //----------------------------------------------------------------------
   // X <- D
@@ -333,8 +362,41 @@ module parc_CoreDpath
     : ( wb_mux_sel_Mhl == 1'd1 ) ? dmemresp_queue_mux_out_Mhl
     :                              32'bx;
 
+
+
   //----------------------------------------------------------------------
-  // W <- M
+  // X2 <- M
+  //----------------------------------------------------------------------
+
+  reg  [31:0] pc_X2hl;
+  reg  [31:0] wb_mux_out_X2hl;
+
+  always @ (posedge clk) begin
+    if( !stall_X2hl ) begin
+      pc_X2hl                 <= pc_Mhl;
+      wb_mux_out_X2hl         <= wb_mux_out_Mhl;
+    end
+  end
+
+ //----------------------------------------------------------------------
+  // X3 <- X2
+  //----------------------------------------------------------------------
+
+
+  reg  [31:0] pc_X3hl;
+  reg  [31:0] wb_mux_out_X3hl;
+
+  always @ (posedge clk) begin
+    if( !stall_X3hl ) begin
+      pc_X3hl                 <= pc_X2hl;
+      wb_mux_out_X3hl         <= wb_mux_out_X2hl;
+    end
+  end
+
+
+
+  //----------------------------------------------------------------------
+  // W <- X3
   //----------------------------------------------------------------------
 
   reg  [31:0] pc_Whl;
@@ -342,8 +404,8 @@ module parc_CoreDpath
 
   always @ (posedge clk) begin
     if( !stall_Whl ) begin
-      pc_Whl                 <= pc_Mhl;
-      wb_mux_out_Whl         <= wb_mux_out_Mhl;
+      pc_Whl                 <= pc_X3hl;
+      wb_mux_out_Whl         <= wb_mux_out_X3hl;
     end
   end
 
@@ -420,12 +482,30 @@ module parc_CoreDpath
     .muldivreq_msg_b       (op1_mux_out_Xhl),
     .muldivreq_val         (muldivreq_val),
     .muldivreq_rdy         (muldivreq_rdy),
-    //Note that this probably will come out in a different pipeline stage than X
     .muldivresp_msg_result (muldivresp_msg_result_Xhl),
     .muldivresp_val        (muldivresp_val),
     .muldivresp_rdy        (muldivresp_rdy)
-    //Note these stall signals should be hooked to something!!!
   );
+
+  // parc_CoreDpathPipeMulDiv imuldiv(
+  //   .clk                   (clk),
+  //   .reset                 (reset),
+  //   .muldivreq_msg_fn      (muldivreq_msg_fn_Dhl),
+  //   .muldivreq_msg_a       (op0_mux_out_Dhl),
+  //   .muldivreq_msg_b       (op1_mux_out_Dhl),
+  //   .muldivreq_val         (muldivreq_val),
+  //   .muldivreq_rdy         (muldivreq_rdy),
+  //   .muldivresp_msg_result (muldivresp_msg_result_X3hl),
+  //   .muldivresp_val        (muldivresp_val),
+  //   .muldivresp_rdy        (muldivresp_rdy)
+
+  //   //These need to be hooked up to something!
+  //   // input         stall_Xhl,
+  //   // input         stall_Mhl,
+  //   // input         stall_X2hl,
+  //   // input         stall_X3hl
+  // )
+  
 
 endmodule
 
