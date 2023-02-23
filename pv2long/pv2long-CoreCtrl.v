@@ -39,13 +39,17 @@ module parc_CoreCtrl
 
   output [31:0] inst_Dhl,
   output  [3:0] alu_fn_Xhl,
-  output  [2:0] muldivreq_msg_fn_Xhl,
+
+  output  [2:0] muldivreq_msg_fn_Dhl,
   output        muldivreq_val,
   input         muldivreq_rdy,
   input         muldivresp_val,
   output        muldivresp_rdy,
-  output        muldiv_mux_sel_Xhl,
-  output        execute_mux_sel_Xhl,
+
+  output        muldiv_mux_sel_X3hl,
+  output        execute_mux_sel_X3hl,
+
+
   output  [2:0] dmemresp_mux_sel_Mhl,
   output        dmemresp_queue_en_Mhl,
   output        dmemresp_queue_val_Mhl,
@@ -363,8 +367,8 @@ module parc_CoreCtrl
 
       `PARC_INST_MSG_ADDU    :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat, y, alu_add,  md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
 
-      `PARC_INST_MSG_LW      :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,   n, alu_add,  md_x,    n, mdm_x, em_x,   ld,  ml_w, dmm_w,  wm_mem, y,  rt, n   };
-      `PARC_INST_MSG_SW      :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,   y, alu_add,  md_x,    n, mdm_x, em_x,   st,  ml_w, dmm_w,  wm_mem, n,  rx, n   };
+      `PARC_INST_MSG_LW      :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,   n, alu_add,  md_x,    n, mdm_x, em_alu,   ld,  ml_w, dmm_w,  wm_mem, y,  rt, n   };
+      `PARC_INST_MSG_SW      :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,   y, alu_add,  md_x,    n, mdm_x, em_alu,   st,  ml_w, dmm_w,  wm_mem, n,  rx, n   };
 
       `PARC_INST_MSG_JAL     :cs={ y,  y,    br_none, pm_j,   am_0,    n, bm_pc,   n, alu_add,  md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rL, n   };
       `PARC_INST_MSG_JR      :cs={ y,  y,    br_none, pm_r,   am_x,    y, bm_x,    n, alu_x,    md_x,    n, mdm_x, em_x,   nr,  ml_x, dmm_x,  wm_x,   n,  rx, n   };
@@ -395,13 +399,13 @@ module parc_CoreCtrl
       `PARC_INST_MSG_SRLV     :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat,   y, alu_srl, md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
       `PARC_INST_MSG_SRAV     :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_rdat,   y, alu_sra, md_x,    n, mdm_x, em_alu, nr,  ml_x, dmm_x,  wm_alu, y,  rd, n   };
       //Memory Instructions
-      `PARC_INST_MSG_LH       :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,     n, alu_add, md_x,    n, mdm_x, em_x,   ld,  ml_h, dmm_h,  wm_mem, y,  rt, n   };
-      `PARC_INST_MSG_LHU       :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,     n, alu_add, md_x,    n, mdm_x, em_x,   ld,  ml_h, dmm_hu,  wm_mem, y,  rt, n   };
-      `PARC_INST_MSG_LB       :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,     n, alu_add, md_x,    n, mdm_x, em_x,   ld,  ml_b, dmm_b,  wm_mem, y,  rt, n   };
-      `PARC_INST_MSG_LBU       :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,     n, alu_add, md_x,    n, mdm_x, em_x,   ld,  ml_b, dmm_bu,  wm_mem, y,  rt, n   };
+      `PARC_INST_MSG_LH       :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,     n, alu_add, md_x,    n, mdm_x, em_alu,   ld,  ml_h, dmm_h,  wm_mem, y,  rt, n   };
+      `PARC_INST_MSG_LHU       :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,     n, alu_add, md_x,    n, mdm_x, em_alu,   ld,  ml_h, dmm_hu,  wm_mem, y,  rt, n   };
+      `PARC_INST_MSG_LB       :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,     n, alu_add, md_x,    n, mdm_x, em_alu,   ld,  ml_b, dmm_b,  wm_mem, y,  rt, n   };
+      `PARC_INST_MSG_LBU       :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,     n, alu_add, md_x,    n, mdm_x, em_alu,   ld,  ml_b, dmm_bu,  wm_mem, y,  rt, n   };
       
-      `PARC_INST_MSG_SH      :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,   y, alu_add,  md_x,    n, mdm_x, em_x,   st,  ml_h, dmm_h,  wm_mem, n,  rx, n   };
-      `PARC_INST_MSG_SB      :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,   y, alu_add,  md_x,    n, mdm_x, em_x,   st,  ml_b, dmm_b,  wm_mem, n,  rx, n   };
+      `PARC_INST_MSG_SH      :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,   y, alu_add,  md_x,    n, mdm_x, em_alu,   st,  ml_h, dmm_h,  wm_mem, n,  rx, n   };
+      `PARC_INST_MSG_SB      :cs={ y,  n,    br_none, pm_p,   am_rdat, y, bm_si,   y, alu_add,  md_x,    n, mdm_x, em_alu,   st,  ml_b, dmm_b,  wm_mem, n,  rx, n   };
 
 
       //JUMP Instructions
@@ -611,6 +615,43 @@ module parc_CoreCtrl
                               && ( dmemreq_msg_rw_Xhl == 0) // If the there's a memory load call
                               && ( dmemreq_val_Xhl == 1) // If the memory is being called for.
                               )
+                            ||
+                            // Don't Bypass Multiply instructions that aren't ready
+                            // Durring Execute Phase
+                            ( rs_en_Dhl && inst_val_Xhl && rf_wen_Xhl
+                              && ( rs_addr_Dhl == rf_waddr_Xhl )
+                              && ( rf_waddr_Xhl != 5'd0 ) 
+                              && ( execute_mux_sel_Xhl == 1) // Check if function eventually uses muldiv.
+                               )
+                            || ( rt_en_Dhl && inst_val_Xhl && rf_wen_Xhl
+                              && ( rt_addr_Dhl == rf_waddr_Xhl )
+                              && ( rf_waddr_Xhl != 5'd0 ) 
+                              && ( execute_mux_sel_Xhl == 1) // Check if function eventually uses muldiv.
+                              )
+                            ||
+                            //During Memory Phase
+                            ( rs_en_Dhl && inst_val_Mhl && rf_wen_Mhl
+                              && ( rs_addr_Dhl == rf_waddr_Mhl )
+                              && ( rf_waddr_Mhl != 5'd0 ) 
+                              && ( execute_mux_sel_Mhl == 1) // Check if function eventually uses muldiv.
+                               )
+                            || ( rt_en_Dhl && inst_val_Mhl && rf_wen_Mhl
+                              && ( rt_addr_Dhl == rf_waddr_Mhl )
+                              && ( rf_waddr_Mhl != 5'd0 ) 
+                              && ( execute_mux_sel_Mhl == 1) // Check if function eventually uses muldiv.
+                              )
+                              ||
+                            //During Second Execute Phase
+                            ( rs_en_Dhl && inst_val_X2hl && rf_wen_X2hl
+                              && ( rs_addr_Dhl == rf_waddr_X2hl )
+                              && ( rf_waddr_X2hl != 5'd0 ) 
+                              && ( execute_mux_sel_X2hl == 1) // Check if function eventually uses muldiv.
+                               )
+                            || ( rt_en_Dhl && inst_val_X2hl && rf_wen_X2hl
+                              && ( rt_addr_Dhl == rf_waddr_X2hl )
+                              && ( rf_waddr_X2hl != 5'd0 ) 
+                              && ( execute_mux_sel_X2hl == 1) // Check if function eventually uses muldiv.
+                              )
                             );
 
   // Aggregate Stall Signal
@@ -626,6 +667,9 @@ module parc_CoreCtrl
   wire bubble_next_Dhl = ( !bubble_sel_Dhl ) ? bubble_Dhl
                        : ( bubble_sel_Dhl )  ? 1'b1
                        :                       1'bx;
+  //Multiplication logic
+  assign muldivreq_val = muldivreq_val_Dhl && inst_val_Dhl;
+
 
   //----------------------------------------------------------------------
   // X <- D
@@ -634,8 +678,8 @@ module parc_CoreCtrl
   reg [31:0] ir_Xhl;
   reg  [2:0] br_sel_Xhl;
   reg  [3:0] alu_fn_Xhl;
+
   reg        muldivreq_val_Xhl;
-  reg  [2:0] muldivreq_msg_fn_Xhl;
   reg        muldiv_mux_sel_Xhl;
   reg        execute_mux_sel_Xhl;
   reg        dmemreq_msg_rw_Xhl;
@@ -661,7 +705,6 @@ module parc_CoreCtrl
       br_sel_Xhl           <= br_sel_Dhl;
       alu_fn_Xhl           <= alu_fn_Dhl;
       muldivreq_val_Xhl    <= muldivreq_val_Dhl;
-      muldivreq_msg_fn_Xhl <= muldivreq_msg_fn_Dhl;
       muldiv_mux_sel_Xhl   <= muldiv_mux_sel_Dhl;
       execute_mux_sel_Xhl  <= execute_mux_sel_Dhl;
       dmemreq_msg_rw_Xhl   <= dmemreq_msg_rw_Dhl;
@@ -687,10 +730,6 @@ module parc_CoreCtrl
 
   wire inst_val_Xhl = ( !bubble_Xhl && !squash_Xhl );
 
-  // Muldiv request
-
-  assign muldivreq_val = muldivreq_val_Xhl && inst_val_Xhl;
-  assign muldivresp_rdy = !stall_Xhl;
 
   // Only send a valid dmem request if not stalled
 
@@ -721,9 +760,9 @@ module parc_CoreCtrl
 
   wire squash_Xhl = 1'b0;
 
-  // Stall in X if muldiv reponse is not valid and there was a valid request
+  // // Stall in X if muldiv reponse is not valid and there was a valid request
 
-  wire stall_muldiv_Xhl = ( muldivreq_val_Xhl && inst_val_Xhl && !muldivresp_val );
+  // wire stall_muldiv_Xhl = ( muldivreq_val_Xhl && inst_val_Xhl && !muldivresp_val );
 
   // Stall in X if imem is not ready
 
@@ -735,7 +774,7 @@ module parc_CoreCtrl
 
   // Aggregate Stall Signal
 
-  assign stall_Xhl = ( stall_Mhl || stall_muldiv_Xhl || stall_imem_Xhl || stall_dmem_Xhl );
+  assign stall_Xhl = ( stall_Mhl || stall_imem_Xhl || stall_dmem_Xhl );
 
   // Next bubble bit
 
@@ -749,6 +788,11 @@ module parc_CoreCtrl
   //----------------------------------------------------------------------
 
   reg [31:0] ir_Mhl;
+  //Propagate Multiply Div Selectors
+  reg        muldiv_mux_sel_Mhl;
+  reg        execute_mux_sel_Mhl;
+  reg        muldivreq_val_Mhl;
+
   reg        dmemreq_val_Mhl;
   reg  [2:0] dmemresp_mux_sel_Mhl;
   reg        wb_mux_sel_Mhl;
@@ -775,6 +819,11 @@ module parc_CoreCtrl
       cp0_addr_Mhl         <= cp0_addr_Xhl;
 
       bubble_Mhl           <= bubble_next_Xhl;
+
+      muldiv_mux_sel_Mhl   <= muldiv_mux_sel_Xhl;
+      execute_mux_sel_Mhl  <= execute_mux_sel_Xhl;
+      muldivreq_val_Mhl  <= muldivreq_val_Xhl;
+
     end
     dmemreq_val_Mhl <= dmemreq_val;
   end
@@ -819,6 +868,12 @@ module parc_CoreCtrl
   //----------------------------------------------------------------------
 
   reg [31:0] ir_X2hl;
+
+  //Propagate Multiply Div Selectors
+  reg        muldiv_mux_sel_X2hl;
+  reg        execute_mux_sel_X2hl;
+  reg        muldivreq_val_X2hl;
+
   reg        dmemresp_queue_val_Mhl;
   reg        rf_wen_X2hl;
   reg  [4:0] rf_waddr_X2hl;
@@ -841,6 +896,11 @@ module parc_CoreCtrl
       cp0_addr_X2hl     <= cp0_addr_Mhl;
 
       bubble_X2hl       <= bubble_next_Mhl;
+
+      muldiv_mux_sel_X2hl   <= muldiv_mux_sel_Mhl;
+      execute_mux_sel_X2hl  <= execute_mux_sel_Mhl;
+      muldivreq_val_X2hl <= muldivreq_val_Mhl;
+
     end
     dmemresp_queue_val_Mhl <= dmemresp_queue_val_next_Mhl;
   end
@@ -869,6 +929,10 @@ module parc_CoreCtrl
   //----------------------------------------------------------------------
 
   reg [31:0] ir_X3hl;
+  //Propagate Multiply Div Selectors
+  reg        muldiv_mux_sel_X3hl;
+  reg        execute_mux_sel_X3hl;
+  reg        muldivreq_val_X3hl;
   reg        rf_wen_X3hl;
   reg  [4:0] rf_waddr_X3hl;
   reg        cp0_wen_X3hl;
@@ -889,6 +953,11 @@ module parc_CoreCtrl
       cp0_wen_X3hl      <= cp0_wen_X2hl;
       cp0_addr_X3hl     <= cp0_addr_X2hl;
       bubble_X3hl       <= bubble_X2hl;
+
+      muldiv_mux_sel_X3hl   <= muldiv_mux_sel_X2hl;
+      execute_mux_sel_X3hl  <= execute_mux_sel_X2hl;
+      muldivreq_val_X3hl <= muldivreq_val_X2hl;
+
     end
   end
 
@@ -900,6 +969,10 @@ module parc_CoreCtrl
   // Is current stage valid?
 
   wire inst_val_X3hl = ( !bubble_X3hl && !squash_X3hl );
+  // Stall in X if muldiv reponse is not valid and there was a valid request
+  assign muldivresp_rdy = !stall_X3hl;
+
+  wire stall_muldiv_X3hl = ( muldivreq_val_X3hl && inst_val_X3hl && !muldivresp_val );
 
   // Only set register file wen if stage is valid
 
@@ -908,7 +981,7 @@ module parc_CoreCtrl
   // Dummy squahs and stall signals
 
   wire squash_X3hl = 1'b0;
-  wire stall_X3hl  = 1'b0;
+  wire stall_X3hl  = stall_muldiv_X3hl;
 
 
   //----------------------------------------------------------------------

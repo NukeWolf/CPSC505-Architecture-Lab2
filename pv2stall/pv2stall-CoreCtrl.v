@@ -612,7 +612,8 @@ module parc_CoreCtrl
 
   // Resolve Branch
 
-  wire bne_taken_Xhl  = ( ( br_sel_Xhl == br_bne ) && bne_resolve_Xhl ) || ( ( br_sel_Xhl == br_beq ) && ~bne_resolve_Xhl ) 
+  wire bne_taken_Xhl  = ( ( br_sel_Xhl == br_bne ) && bne_resolve_Xhl ) 
+                        || ( ( br_sel_Xhl == br_beq ) && ~bne_resolve_Xhl ) 
                         || ( ( br_sel_Xhl == br_blez ) && (branch_cond_zero_Xhl || branch_cond_neg_Xhl))
                         || ( ( br_sel_Xhl == br_bgtz ) && ~(branch_cond_zero_Xhl || branch_cond_neg_Xhl))
                         || ( ( br_sel_Xhl == br_bltz ) && branch_cond_neg_Xhl)

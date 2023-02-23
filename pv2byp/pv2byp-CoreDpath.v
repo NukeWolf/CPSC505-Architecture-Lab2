@@ -30,6 +30,11 @@ module parc_CoreDpath
   input   [1:0] pc_mux_sel_Phl,
   input   [1:0] op0_mux_sel_Dhl,
   input   [2:0] op1_mux_sel_Dhl,
+  //Added Code
+  input  [1:0] rs_op0_byp_mux_sel_Dhl,
+  input  [1:0] rt_op1_byp_mux_sel_Dhl,
+  
+  // End of Added Code
   input  [31:0] inst_Dhl,
   input   [3:0] alu_fn_Xhl,
   input   [2:0] muldivreq_msg_fn_Xhl,
@@ -165,7 +170,7 @@ module parc_CoreDpath
 
   wire [31:0] jumpreg_targ_Dhl;
 
-  assign jumpreg_targ_Dhl  = rf_rdata0_Dhl;
+  assign jumpreg_targ_Dhl  = rs_op0_byp_mux_out_Dhl;
 
   // Zero and sign extension immediate
 
@@ -181,10 +186,28 @@ module parc_CoreDpath
   wire [31:0] const0    = 32'd0;
   wire [31:0] const16   = 32'd16;
 
+
+  //Register Bypassing Mux Selectors
+  wire [31:0] rs_op0_byp_mux_out_Dhl
+    = ( rs_op0_byp_mux_sel_Dhl == 2'd0 ) ? rf_rdata0_Dhl
+    : ( rs_op0_byp_mux_sel_Dhl == 2'd1 ) ? execute_mux_out_Xhl
+    : ( rs_op0_byp_mux_sel_Dhl == 2'd2 ) ? wb_mux_out_Mhl
+    : ( rs_op0_byp_mux_sel_Dhl == 2'd3 ) ? wb_mux_out_Whl
+    :                               32'bx;
+
+  wire [31:0] rt_op1_byp_mux_out_Dhl
+    = ( rt_op1_byp_mux_sel_Dhl == 2'd0 ) ? rf_rdata1_Dhl
+    : ( rt_op1_byp_mux_sel_Dhl == 2'd1 ) ? execute_mux_out_Xhl
+    : ( rt_op1_byp_mux_sel_Dhl == 2'd2 ) ? wb_mux_out_Mhl
+    : ( rt_op1_byp_mux_sel_Dhl == 2'd3 ) ? wb_mux_out_Whl
+    :                               32'bx;
+
+
+
   // Operand 0 mux
 
   wire [31:0] op0_mux_out_Dhl
-    = ( op0_mux_sel_Dhl == 2'd0 ) ? rf_rdata0_Dhl
+    = ( op0_mux_sel_Dhl == 2'd0 ) ? rs_op0_byp_mux_out_Dhl
     : ( op0_mux_sel_Dhl == 2'd1 ) ? shamt_Dhl
     : ( op0_mux_sel_Dhl == 2'd2 ) ? const16
     : ( op0_mux_sel_Dhl == 2'd3 ) ? const0
@@ -193,7 +216,7 @@ module parc_CoreDpath
   // Operand 1 mux
 
   wire [31:0] op1_mux_out_Dhl
-    = ( op1_mux_sel_Dhl == 3'd0 ) ? rf_rdata1_Dhl
+    = ( op1_mux_sel_Dhl == 3'd0 ) ? rt_op1_byp_mux_out_Dhl
     : ( op1_mux_sel_Dhl == 3'd1 ) ? imm_zext_Dhl
     : ( op1_mux_sel_Dhl == 3'd2 ) ? imm_sext_Dhl
     : ( op1_mux_sel_Dhl == 3'd3 ) ? pc_plus4_Dhl
@@ -202,7 +225,7 @@ module parc_CoreDpath
 
   // wdata with bypassing
 
-  wire [31:0] wdata_Dhl = rf_rdata1_Dhl;
+  wire [31:0] wdata_Dhl = rt_op1_byp_mux_out_Dhl;
 
   //----------------------------------------------------------------------
   // X <- D

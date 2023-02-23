@@ -9,6 +9,7 @@
 `include "pv2long-InstMsg.v"
 `include "pv2long-CoreDpathAlu.v"
 `include "pv2long-CoreDpathRegfile.v"
+`include "pv2long-CoreDpathPipeMulDiv.v"
 
 module parc_CoreDpath
 (
@@ -37,13 +38,15 @@ module parc_CoreDpath
   // End of Added Code
   input  [31:0] inst_Dhl,
   input   [3:0] alu_fn_Xhl,
-  input   [2:0] muldivreq_msg_fn_Xhl,
+
+  input   [2:0] muldivreq_msg_fn_Dhl,
   input         muldivreq_val,
   output        muldivreq_rdy,
   output        muldivresp_val,
   input         muldivresp_rdy,
-  input         muldiv_mux_sel_Xhl,
-  input         execute_mux_sel_Xhl,
+  input         muldiv_mux_sel_X3hl,
+  input         execute_mux_sel_X3hl,
+
   input   [2:0] dmemresp_mux_sel_Mhl,
   input         dmemresp_queue_en_Mhl,
   input         dmemresp_queue_val_Mhl,
@@ -192,7 +195,7 @@ module parc_CoreDpath
   //Register Bypassing Mux Selectors
   wire [31:0] rs_op0_byp_mux_out_Dhl
     = ( rs_op0_byp_mux_sel_Dhl == 3'd0 ) ? rf_rdata0_Dhl
-    : ( rs_op0_byp_mux_sel_Dhl == 3'd1 ) ? execute_mux_out_Xhl
+    : ( rs_op0_byp_mux_sel_Dhl == 3'd1 ) ? alu_out_Xhl
     : ( rs_op0_byp_mux_sel_Dhl == 3'd2 ) ? wb_mux_out_Mhl
     : ( rs_op0_byp_mux_sel_Dhl == 3'd3 ) ? wb_mux_out_X2hl
     : ( rs_op0_byp_mux_sel_Dhl == 3'd4 ) ? wb_mux_out_X3hl //TODO: REDO CONNECTION ONCE WE ADD MULDIV MUX
@@ -201,7 +204,7 @@ module parc_CoreDpath
 
   wire [31:0] rt_op1_byp_mux_out_Dhl
     = ( rt_op1_byp_mux_sel_Dhl == 3'd0 ) ? rf_rdata1_Dhl
-    : ( rt_op1_byp_mux_sel_Dhl == 3'd1 ) ? execute_mux_out_Xhl
+    : ( rt_op1_byp_mux_sel_Dhl == 3'd1 ) ? alu_out_Xhl
     : ( rt_op1_byp_mux_sel_Dhl == 3'd2 ) ? wb_mux_out_Mhl
     : ( rt_op1_byp_mux_sel_Dhl == 3'd3 ) ? wb_mux_out_X2hl
     : ( rt_op1_byp_mux_sel_Dhl == 3'd4 ) ? wb_mux_out_X3hl  //TODO: REDO CONNECTION ONCE WE ADD MULDIV MUX
@@ -272,23 +275,7 @@ module parc_CoreDpath
   assign dmemreq_msg_addr = alu_out_Xhl;
   assign dmemreq_msg_data = wdata_Xhl;
 
-  // Muldiv Unit
-
-  wire [63:0] muldivresp_msg_result_Xhl;
-
-  // Muldiv Result Mux
-
-  wire [31:0] muldiv_mux_out_Xhl
-    = ( muldiv_mux_sel_Xhl == 1'd0 ) ? muldivresp_msg_result_Xhl[31:0]
-    : ( muldiv_mux_sel_Xhl == 1'd1 ) ? muldivresp_msg_result_Xhl[63:32]
-    :                                  32'bx;
-
-  // Execute Result Mux
-
-  wire [31:0] execute_mux_out_Xhl
-    = ( execute_mux_sel_Xhl == 1'd0 ) ? alu_out_Xhl
-    : ( execute_mux_sel_Xhl == 1'd1 ) ? muldiv_mux_out_Xhl
-    :                                   32'bx;
+  
 
   //----------------------------------------------------------------------
   // M <- X
@@ -301,7 +288,7 @@ module parc_CoreDpath
   always @ (posedge clk) begin
     if( !stall_Mhl ) begin
       pc_Mhl              <= pc_Xhl;
-      execute_mux_out_Mhl <= execute_mux_out_Xhl;
+      execute_mux_out_Mhl <= alu_out_Xhl;
       wdata_Mhl           <= wdata_Xhl;
     end
   end
@@ -384,15 +371,34 @@ module parc_CoreDpath
 
 
   reg  [31:0] pc_X3hl;
-  reg  [31:0] wb_mux_out_X3hl;
+  reg  [31:0] wb_mem_alu_out_X3hl;
 
   always @ (posedge clk) begin
     if( !stall_X3hl ) begin
       pc_X3hl                 <= pc_X2hl;
-      wb_mux_out_X3hl         <= wb_mux_out_X2hl;
+      wb_mem_alu_out_X3hl         <= wb_mux_out_X2hl;
     end
   end
+  //----------------------------------------------------------------------
+  // X3 Stage -  Muldiv_Mux Selection
+  //----------------------------------------------------------------------
+  // Muldiv Unit
 
+  wire [63:0] muldivresp_msg_result_X3hl;
+
+  // Muldiv Result Mux
+
+  wire [31:0] muldiv_mux_out_X3hl
+    = ( muldiv_mux_sel_X3hl == 1'd0 ) ? muldivresp_msg_result_X3hl[31:0]
+    : ( muldiv_mux_sel_X3hl == 1'd1 ) ? muldivresp_msg_result_X3hl[63:32]
+    :                                  32'bx;
+
+  // Execute Result Mux
+
+  wire [31:0] wb_mux_out_X3hl
+    = ( execute_mux_sel_X3hl == 1'd0 ) ? wb_mem_alu_out_X3hl
+    : ( execute_mux_sel_X3hl == 1'd1 ) ? muldiv_mux_out_X3hl
+    :                                   32'bx;
 
 
   //----------------------------------------------------------------------
@@ -473,38 +479,37 @@ module parc_CoreDpath
 
   // Multiplier/Divider
 
-  imuldiv_IntMulDivIterative imuldiv
-  (
-    .clk                   (clk),
-    .reset                 (reset),
-    .muldivreq_msg_fn      (muldivreq_msg_fn_Xhl),
-    .muldivreq_msg_a       (op0_mux_out_Xhl),
-    .muldivreq_msg_b       (op1_mux_out_Xhl),
-    .muldivreq_val         (muldivreq_val),
-    .muldivreq_rdy         (muldivreq_rdy),
-    .muldivresp_msg_result (muldivresp_msg_result_Xhl),
-    .muldivresp_val        (muldivresp_val),
-    .muldivresp_rdy        (muldivresp_rdy)
-  );
-
-  // parc_CoreDpathPipeMulDiv imuldiv(
+  // imuldiv_IntMulDivIterative imuldiv
+  // (
   //   .clk                   (clk),
   //   .reset                 (reset),
-  //   .muldivreq_msg_fn      (muldivreq_msg_fn_Dhl),
-  //   .muldivreq_msg_a       (op0_mux_out_Dhl),
-  //   .muldivreq_msg_b       (op1_mux_out_Dhl),
+  //   .muldivreq_msg_fn      (muldivreq_msg_fn_Xhl),
+  //   .muldivreq_msg_a       (op0_mux_out_Xhl),
+  //   .muldivreq_msg_b       (op1_mux_out_Xhl),
   //   .muldivreq_val         (muldivreq_val),
   //   .muldivreq_rdy         (muldivreq_rdy),
-  //   .muldivresp_msg_result (muldivresp_msg_result_X3hl),
+  //   .muldivresp_msg_result (muldivresp_msg_result_Xhl),
   //   .muldivresp_val        (muldivresp_val),
   //   .muldivresp_rdy        (muldivresp_rdy)
+  // );
 
-  //   //These need to be hooked up to something!
-  //   // input         stall_Xhl,
-  //   // input         stall_Mhl,
-  //   // input         stall_X2hl,
-  //   // input         stall_X3hl
-  // )
+  parc_CoreDpathPipeMulDiv imuldiv(
+    .clk                   (clk),
+    .reset                 (reset),
+    .muldivreq_msg_fn      (muldivreq_msg_fn_Dhl),
+    .muldivreq_msg_a       (op0_mux_out_Dhl),
+    .muldivreq_msg_b       (op1_mux_out_Dhl),
+    .muldivreq_val         (muldivreq_val),
+    .muldivreq_rdy         (muldivreq_rdy),
+    .muldivresp_msg_result (muldivresp_msg_result_X3hl),
+    .muldivresp_val        (muldivresp_val),
+    .muldivresp_rdy        (muldivresp_rdy),
+    //These need to be hooked up to something!
+    .stall_Xhl    (stall_Xhl),
+    .stall_Mhl    (stall_Mhl),
+    .stall_X2hl    (stall_X2hl),
+    .stall_X3hl    (stall_X3hl)
+  );
   
 
 endmodule
